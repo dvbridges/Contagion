@@ -1,13 +1,14 @@
 import argparse 
 import numpy as np 
+from matplotlib import colors
 import matplotlib.pyplot as plt  
 import matplotlib.animation as animation 
   
 # setting up the values for the grid 
-ON = 255
+ON = 50
 OFF = 0
-RECOVER = 200 
-DEAD = 100 
+RECOVER = 100 
+DEAD = 150 
 vals = [ON, OFF] 
 FRAMES = 200
 LIFETIME = float(FRAMES)
@@ -15,13 +16,26 @@ GSIZE = 100
 RateOfSpread = 3/8.0
 MOVIE_SPEED = 5 
 
-daysInfected =  np.zeros((GSIZE, GSIZE))
+# create a very simple color palette
+red = np.array([48, 255, 252, 127]) / 256.
+green = np.array([41, 140, 250, 127]) / 256.
+blue = np.array([40, 0, 104, 127]) / 256.
+cols = np.array([red, green, blue]).T
 
-potential = np.random.choice([True, False], GSIZE*GSIZE, p=[0.97,
-    0.03]).reshape(GSIZE, GSIZE) 
+bounds = np.arange(0,150,4)
+cm = colors.ListedColormap(cols)
+norm = colors.BoundaryNorm(bounds, cm.N)
 
-immune = np.random.choice([True, False], GSIZE*GSIZE, p=[0.01,
-    0.99]).reshape(GSIZE, GSIZE) 
+daysInfected =  np.zeros(
+        (GSIZE, GSIZE))
+potential = np.random.choice(
+        [True, False], 
+        GSIZE*GSIZE, 
+        p=[0.97, 0.03]).reshape(GSIZE, GSIZE) 
+immune = np.random.choice(
+        [True, False], 
+        GSIZE*GSIZE, 
+        p=[0.01, 0.99]).reshape(GSIZE, GSIZE) 
 
 Writer = animation.writers['ffmpeg']
 writer = Writer(fps=MOVIE_SPEED, metadata=dict(artist='Me'), bitrate=9600)
@@ -140,7 +154,11 @@ def main():
   
     # set up animation 
     fig, ax = plt.subplots() 
-    img = ax.imshow(grid, interpolation='nearest') 
+    img = ax.imshow(grid, interpolation='nearest', cmap=cm, norm=norm) 
+    ax.set_xticklabels([])
+    ax.set_yticklabels([])
+    ax.set_xticks([])
+    ax.set_yticks([])
     # set output file 
     ani = animation.FuncAnimation(fig, update, fargs=(img, grid, GSIZE, ), 
                                   frames = FRAMES, 
